@@ -1,10 +1,10 @@
 FROM node:18
-WORKDIR /app
-COPY . /app
+WORKDIR D:\LD\Web development\todolist-v2-starting-files\ap
+COPY ["package.json", "package-lock.json*", "./"]
 RUN npm install 
 
 COPY . .
 
-EXPOSE 3000
+EXPOSE 8080
 
-CMD [ "node", "app.js"  ]
+CMD [ "node", "server.js"  ]
