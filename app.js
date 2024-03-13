@@ -6,7 +6,6 @@ const mongoose = require("mongoose");
 const _ = require("lodash");
 
 const app = express();
-
 // const database = module.exports = () => {
 //   const connectionParams = {
 //     useNewUrlParser: true,
@@ -23,40 +22,42 @@ const app = express();
 
 // database();
 
-app.set('view engine', 'ejs');
+app.set("view engine", "ejs");
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static("public"));
 
-mongoose.connect("mongodb+srv://Jeeya:jeeya28@cluster0.ae9il1u.mongodb.net/todoListDB", { useNewUrlParser: true, useUnifiedTopology: true });
+mongoose.connect(
+  "mongodb+srv://Jeeya:jeeya28@cluster0.ae9il1u.mongodb.net/todoListDB",
+  { useNewUrlParser: true, useUnifiedTopology: true }
+);
 
 const itemsSchema = {
-  name: String
+  name: String,
 };
 
 const Item = mongoose.model("Item", itemsSchema);
 
 const item1 = new Item({
-  name: "Welcome to your todolist!!"
+  name: "Welcome to your todolist!!",
 });
 
 const item2 = new Item({
-  name: "Hit the + button to add a new item."
+  name: "Hit the + button to add a new item.",
 });
 
 const item3 = new Item({
-  name: "<-- Hit this to delete an item."
+  name: "<-- Hit this to delete an item.",
 });
 
 const defaultItems = [item1, item2, item3]; // default items
 
 const ListSchema = {
   name: String,
-  items: [itemsSchema]
+  items: [itemsSchema],
 };
 
 const List = mongoose.model("List", ListSchema);
-
 
 app.get("/", async function (req, res) {
   try {
@@ -66,14 +67,10 @@ app.get("/", async function (req, res) {
       await Item.insertMany(defaultItems);
       console.log("Successfully saved default items.");
       res.redirect("/"); // Redirect to the root route after inserting default items
-    }
-
-    else {
+    } else {
       res.render("list", { listTitle: "Today", newListItems: foundItems });
     }
-  }
-
-  catch (err) {
+  } catch (err) {
     console.log(err);
   }
 });
@@ -87,32 +84,29 @@ app.get("/:customListName", async function (req, res) {
     if (!foundList) {
       const list = new List({
         name: customListName,
-        items: defaultItems
+        items: defaultItems,
       });
 
       list.save();
       res.redirect("/" + customListName);
     } else {
-      res.render("list", { listTitle: foundList.name, newListItems: foundList.items })
+      res.render("list", {
+        listTitle: foundList.name,
+        newListItems: foundList.items,
+      });
     }
-
   } catch (err) {
-    console.log(err);   // Render a generic error page if there was an error
+    console.log(err); // Render a generic error page if there was an error
     res.render("error");
   }
-
-
-
-
 });
-
 
 app.post("/", async function (req, res) {
   const itemName = req.body.newItem;
   const listName = req.body.list;
 
   const item = new Item({
-    name: itemName
+    name: itemName,
   });
 
   if (listName === "Today") {
@@ -131,7 +125,6 @@ app.post("/", async function (req, res) {
   }
 });
 
-
 app.post("/delete", function (req, res) {
   const checkedItemId = req.body.checkbox;
   const listName = req.body.listName;
@@ -146,21 +139,18 @@ app.post("/delete", function (req, res) {
         console.log(err);
       });
   } else {
-    List.findOneAndUpdate({ name: listName }, { $pull: { items: { _id: checkedItemId } } })
-      .then(foundList => {
+    List.findOneAndUpdate(
+      { name: listName },
+      { $pull: { items: { _id: checkedItemId } } }
+    )
+      .then((foundList) => {
         return res.redirect("/" + listName);
       })
-      .catch(err => {
+      .catch((err) => {
         console.log(err);
       });
-
   }
-
-
-
-  
 });
-
 
 app.get("/about", function (req, res) {
   res.render("about");
